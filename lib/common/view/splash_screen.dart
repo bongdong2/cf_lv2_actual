@@ -1,34 +1,42 @@
 import 'package:actual/common/layout/default_layout.dart';
+import 'package:actual/common/sercure_storage/sercure_storage.dart';
 import 'package:actual/common/view/root_tab.dart';
 import 'package:actual/user/view/login_screen.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../const/colors.dart';
 import '../const/data.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends ConsumerState<SplashScreen> {
   final dio = Dio();
 
   @override
   void initState() {
     super.initState();
     //deleteToken();
-    checkToken();
+    // 에러 발생으로..
+    Future.delayed(Duration.zero, () {
+      checkToken();
+    });
   }
 
   void deleteToken() async {
+    final storage = ref.watch(secureStorageProvider);
     await storage.deleteAll();
   }
 
   void checkToken() async {
+    final storage = ref.watch(secureStorageProvider);
+
     final refreshToken = await storage.read(key: REFRESH_TOKEN_KEY);
 
     try {

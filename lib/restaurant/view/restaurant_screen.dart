@@ -1,74 +1,51 @@
-import 'package:actual/common/dio/dio.dart';
-import 'package:actual/restaurant/model/restaurant_model.dart';
-import 'package:actual/restaurant/repository/restaurant_repository.dart';
+import 'package:actual/restaurant/provider/restaurant_provider.dart';
 import 'package:actual/restaurant/view/restaurant_detail_screen.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../common/const/data.dart';
 import '../component/restaurant_card.dart';
 
-class RestaurantScreen extends StatelessWidget {
+class RestaurantScreen extends ConsumerWidget {
   const RestaurantScreen({Key? key}) : super(key: key);
 
-  Future<List<RestaurantModel>> paginateRestaurant() async {
-    final dio = Dio();
-
-    dio.interceptors.add(
-      CustomInterceptor(storage: storage),
-    );
-
-    final resp = await RestaurantRepository(dio, baseUrl: 'http://$ip/restaurant').paginate();
-    return resp.data;
-  }
-
   @override
-  Widget build(BuildContext context) {
-    // rootTab 내부에 넣을 예정이므로 따로 Scaffold는 필요 없다.
-    return Center(
-      child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: FutureBuilder<List<RestaurantModel>>(
-            future: paginateRestaurant(),
-            builder: (context, AsyncSnapshot<List<RestaurantModel>> snapshot) {
-              print(snapshot.error);
-              print(snapshot.data);
+  Widget build(BuildContext context, WidgetRef ref) {
+    // 이제 FutureBuilder 필요 없음
+    final data = ref.watch(restaurantProvider);
 
-              print('snapshot.hasData : ${snapshot.hasData}');
-              if (!snapshot.hasData) {
-                return Container(
-                  child: Center(
-                    child: Text('데이터가 없습니다.'),
+    // 임시 예외처리
+    if (data.length == 0) {
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: ListView.separated(
+          itemCount: data.length,
+          itemBuilder: (_, index) {
+            final pItem = data[index];
+
+            return GestureDetector(
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => ResaturantDetailScreen(
+                      id: pItem.id,
+                    ),
                   ),
                 );
-              }
-
-              return ListView.separated(
-                itemCount: snapshot.data!.length,
-                itemBuilder: (_, index) {
-                  final pItem = snapshot.data![index];
-
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => ResaturantDetailScreen(
-                            id: pItem.id,
-                          ),
-                        ),
-                      );
-                    },
-                    child: RestaurantCard.fromModel(
-                      model: pItem,
-                    ),
-                  );
-                },
-                separatorBuilder: (_, index) {
-                  return SizedBox(height: 16.0);
-                },
-              );
-            },
-          )),
+              },
+              child: RestaurantCard.fromModel(
+                model: pItem,
+              ),
+            );
+          },
+          separatorBuilder: (_, index) {
+            return SizedBox(height: 16.0);
+          },
+        )
     );
   }
 }
