@@ -1,3 +1,4 @@
+import 'package:actual/common/model/cursor_pagination_model.dart';
 import 'package:actual/restaurant/provider/restaurant_provider.dart';
 import 'package:actual/restaurant/view/restaurant_detail_screen.dart';
 import 'package:flutter/material.dart';
@@ -13,19 +14,22 @@ class RestaurantScreen extends ConsumerWidget {
     // 이제 FutureBuilder 필요 없음
     final data = ref.watch(restaurantProvider);
 
-    // 임시 예외처리
-    if (data.length == 0) {
+    // 진짜 로딩일 때만 로딩을 보여주자.
+    if(data is CursorPaginationLoading) {
       return Center(
         child: CircularProgressIndicator(),
       );
     }
 
+    // 임시
+    final cp = data as CursorPagination;
+
     return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: ListView.separated(
-          itemCount: data.length,
+          itemCount: cp.data.length,
           itemBuilder: (_, index) {
-            final pItem = data[index];
+            final pItem = cp.data[index];
 
             return GestureDetector(
               onTap: () {

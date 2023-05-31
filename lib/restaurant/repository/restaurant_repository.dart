@@ -1,5 +1,6 @@
 import 'package:actual/common/dio/dio.dart';
 import 'package:actual/common/model/cursor_pagination_model.dart';
+import 'package:actual/common/model/pagination_params.dart';
 import 'package:actual/restaurant/model/restaurant_detail_model.dart';
 import 'package:dio/dio.dart' hide Headers; // 임시 헤더로 인해서 Dio 헤더는 숨긴다.
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,16 +18,18 @@ final restaurantRepositoryProvider = Provider<RestaurantRepository>((ref) {
 });
 
 @RestApi()
-abstract class RestaurantRepository { // 인스턴스화 되지 않게 abstract
-  factory RestaurantRepository(Dio dio, {String baseUrl})
-  = _RestaurantRepository;
+abstract class RestaurantRepository {
+  // 인스턴스화 되지 않게 abstract
+  factory RestaurantRepository(Dio dio, {String baseUrl}) =
+      _RestaurantRepository;
 
   @GET('/')
   @Headers({
     'accessToken': 'true',
   })
-  Future<CursorPagination<RestaurantModel>> paginate();
-
+  Future<CursorPagination<RestaurantModel>> paginate({
+    @Queries() PaginationParams? paginationParams = const PaginationParams(),
+  });
 
   @GET('/{id}')
   @Headers({
