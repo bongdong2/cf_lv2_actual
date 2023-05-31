@@ -31,7 +31,7 @@ class RestaurantScreen extends ConsumerWidget {
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => ResaturantDetailScreen(
+                    builder: (_) => RestaurantDetailScreen(
                       id: pItem.id,
                     ),
                   ),

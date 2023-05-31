@@ -1,5 +1,3 @@
-import 'package:actual/common/const/data.dart';
-import 'package:actual/common/dio/dio.dart';
 import 'package:actual/common/layout/default_layout.dart';
 import 'package:actual/product/component/product_card.dart';
 import 'package:actual/restaurant/component/restaurant_card.dart';
@@ -10,10 +8,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../common/const/colors.dart';
 
-class ResaturantDetailScreen extends ConsumerWidget {
+class RestaurantDetailScreen extends ConsumerWidget {
   final String id;
 
-  const ResaturantDetailScreen({
+  const RestaurantDetailScreen({
     required this.id,
     Key? key,
   }) : super(key: key);
