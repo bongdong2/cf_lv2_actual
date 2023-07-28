@@ -4,6 +4,8 @@ import 'package:actual/common/const/colors.dart';
 import 'package:actual/common/const/data.dart';
 import 'package:actual/common/layout/default_layout.dart';
 import 'package:actual/common/sercure_storage/sercure_storage.dart';
+import 'package:actual/user/model/user_model.dart';
+import 'package:actual/user/provider/user_me_proivder.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,6 +14,8 @@ import '../../common/component/custom_text_form_field.dart';
 import '../../common/view/root_tab.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
+  static String get routeName => 'login';
+
   const LoginScreen({Key? key}) : super(key: key);
 
   @override
@@ -24,7 +28,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final dio = Dio();
+    final state = ref.watch(userMeProvider);
 
     return DefaultLayout(
       child: SingleChildScrollView(
@@ -69,35 +73,41 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   height: 16.0,
                 ),
                 ElevatedButton(
-                    onPressed: () async {
-                      final rawString = '$username:$password';
+                    onPressed: state is UserModelLoading
+                        ? null
+                        : () async {
+                            final rawString = '$username:$password';
+                            ref.read(userMeProvider.notifier).login(
+                                  username: username,
+                                  password: password,
+                                );
 
-                      // <String, String> : String 값을 넣고 String을 반환 받겠다.
-                      // Base64 값으로 인코딩
-                      Codec<String, String> stringToBase64 = utf8.fuse(base64);
-                      String token = stringToBase64.encode(rawString);
-
-                      print('ip : $ip');
-
-                      final resp = await dio.post(
-                        'http://$ip/auth/login',
-                        options: Options(headers: {
-                          'authorization': 'Basic $token',
-                        }),
-                      );
-
-                      final refreshToken = resp.data['refreshToken'];
-                      final accessToken = resp.data['accessToken'];
-
-                      final storage = ref.read(secureStorageProvider);
-
-                      storage.write(
-                          key: REFRESH_TOKEN_KEY, value: refreshToken);
-                      storage.write(key: ACCESS_TOKEN_KEY, value: accessToken);
-
-                      Navigator.of(context)
-                          .push(MaterialPageRoute(builder: (_) => RootTab()));
-                    },
+                            // // <String, String> : String 값을 넣고 String을 반환 받겠다.
+                            // // Base64 값으로 인코딩
+                            // Codec<String, String> stringToBase64 = utf8.fuse(base64);
+                            // String token = stringToBase64.encode(rawString);
+                            //
+                            // print('ip : $ip');
+                            //
+                            // final resp = await dio.post(
+                            //   'http://$ip/auth/login',
+                            //   options: Options(headers: {
+                            //     'authorization': 'Basic $token',
+                            //   }),
+                            // );
+                            //
+                            // final refreshToken = resp.data['refreshToken'];
+                            // final accessToken = resp.data['accessToken'];
+                            //
+                            // final storage = ref.read(secureStorageProvider);
+                            //
+                            // storage.write(
+                            //     key: REFRESH_TOKEN_KEY, value: refreshToken);
+                            // storage.write(key: ACCESS_TOKEN_KEY, value: accessToken);
+                            //
+                            // Navigator.of(context)
+                            //     .push(MaterialPageRoute(builder: (_) => RootTab()));
+                          },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: PRIMARY_COLOR,
                     ),
