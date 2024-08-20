@@ -10,7 +10,7 @@ import 'package:actual/restaurant/provider/restaurant_provider.dart';
 import 'package:actual/restaurant/provider/restaurant_rating_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:skeletons/skeletons.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../rating/model/rating_model.dart';
 
@@ -68,7 +68,7 @@ class _RestaurantDetailScreenState
         controller: controller,
         slivers: [
           renderTop(
-            model: state!,
+            model: state,
           ),
           if (state is! RestaurantDetailModel) renderLoading(),
           if (state is RestaurantDetailModel) renderLabel(),
@@ -117,15 +117,17 @@ class _RestaurantDetailScreenState
         delegate: SliverChildListDelegate(
           List.generate(
             3,
-            (index) => Padding(
+                (index) => Padding(
               padding: const EdgeInsets.only(
                 bottom: 32.0,
               ),
-              child: SkeletonParagraph(
-                style: SkeletonParagraphStyle(
-                  lines: 5,
-                  padding: EdgeInsets.zero,
+              child: Skeletonizer(
+                child: Container(
+                  width: double.infinity,
+                  height: 100.0,
+                  color: Colors.grey[300],
                 ),
+                //borderRadius: BorderRadius.circular(8.0),
               ),
             ),
           ),

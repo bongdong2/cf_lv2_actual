@@ -1,6 +1,7 @@
 import 'package:actual/common/dio/dio.dart';
 import 'package:dio/dio.dart' hide Headers;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:retrofit/error_logger.dart';
 import 'package:retrofit/http.dart';
 import '../../common/const/data.dart';
 import '../model/user_model.dart';

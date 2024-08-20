@@ -75,7 +75,7 @@ class AuthProvider extends ChangeNotifier {
 
     print('*********************************************');
 
-    final logginIn = state.location == '/login';
+    final logginIn = state.matchedLocation == '/login';
 
     // 유저 정보가 없는데
     // 로그인중이면 그대로 로그인 페이지에 두고
@@ -91,7 +91,7 @@ class AuthProvider extends ChangeNotifier {
     // 로그인 중이거나 현재 위치가 SplashScreen이면
     // 홈으로 이동
     if (user is UserModel) {
-      return logginIn || state.location == '/splash' ? '/' : null;
+      return logginIn || state.matchedLocation == '/splash' ? '/' : null;
     }
 
     // UserModelError

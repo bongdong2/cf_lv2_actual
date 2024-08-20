@@ -5,6 +5,7 @@ import 'package:actual/common/repository/base_pagination_repository.dart';
 import 'package:actual/restaurant/model/restaurant_detail_model.dart';
 import 'package:dio/dio.dart' hide Headers; // 임시 헤더로 인해서 Dio 헤더는 숨긴다.
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:retrofit/error_logger.dart';
 import 'package:retrofit/http.dart';
 
 import '../../common/const/data.dart';
