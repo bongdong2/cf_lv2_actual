@@ -1,4 +1,4 @@
-import 'package:actual/common/privider/pagination_provider.dart';
+import 'package:actual/common/provider/pagination_provider.dart';
 import 'package:flutter/cupertino.dart';
 
 class PaginationUtils {

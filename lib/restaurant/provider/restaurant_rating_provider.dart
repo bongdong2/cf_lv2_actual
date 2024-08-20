@@ -1,5 +1,5 @@
 import 'package:actual/common/model/cursor_pagination_model.dart';
-import 'package:actual/common/privider/pagination_provider.dart';
+import 'package:actual/common/provider/pagination_provider.dart';
 import 'package:actual/rating/model/rating_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
