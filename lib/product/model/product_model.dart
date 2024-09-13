@@ -14,7 +14,7 @@ class ProductModel implements IModelWithId {
   @JsonKey(
     fromJson: DataUtils.pathToUrl,
   )
-  final String imageUrl;
+  final String imgUrl;
   final int price;
   final RestaurantModel restaurant;
 
@@ -22,7 +22,7 @@ class ProductModel implements IModelWithId {
     required this.id,
     required this.name,
     required this.detail,
-    required this.imageUrl,
+    required this.imgUrl,
     required this.price,
     required this.restaurant,
   });
