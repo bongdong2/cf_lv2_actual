@@ -6,18 +6,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:retrofit/error_logger.dart';
 import 'package:retrofit/http.dart';
 
-import '../common/const/data.dart';
-import '../common/model/cursor_pagination_model.dart';
-import '../common/model/pagination_params.dart';
+import '../../common/const/data.dart';
+import '../../common/model/cursor_pagination_model.dart';
+import '../../common/model/pagination_params.dart';
 
 part 'restaurant_rating_repository.g.dart';
 
-final restaurantRatingRepositoryProvider = Provider.family<
-    RestaurantRatingRepository,
-    String
->((ref, id) {
+final restaurantRatingRepositoryProvider = Provider.family<RestaurantRatingRepository, String>((ref, id) {
   final dio = ref.watch(dioProvider);
-
   return RestaurantRatingRepository(dio, baseUrl: 'http://$ip/restaurant/$id/rating');
 });
 

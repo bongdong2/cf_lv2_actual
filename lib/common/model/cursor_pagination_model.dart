@@ -64,22 +64,23 @@ class CursorPaginationMeta {
       _$CursorPaginationMetaFromJson(json);
 }
 
-// 새로고침 할 때(맨 위에서 아래로 튕기는 제스쳐)
-// extends CursorPagination 이유 : 새로고침 할 때 이미 데이터가 있는 것을 가정하기 때문에
-// CursorPaginationBase 도 자연스럽게 상속받는다.
-class CursorPaginationRefetching<T> extends CursorPagination<T> {
-  // CursorPaginationRefetching is CursorPagination  == true
-  // CursorPaginationRefetching is CursorPaginationBase == true
-
-  CursorPaginationRefetching({
+// 리스트의 맨 아래로 내려서 추가 데이터를 요청하는 중에 로딩 중인 경우
+class CursorPaginationFetchingMore<T> extends CursorPagination<T> {
+  CursorPaginationFetchingMore({
     required super.meta,
     required super.data,
   });
 }
 
-// 리스트의 맨 아래로 내려서 추가 데이터를 요청하는 중에 로딩 중인 경우
-class CursorPaginationFetchingMore<T> extends CursorPagination<T> {
-  CursorPaginationFetchingMore({
+// 새로고침 할 때(맨 위에서 아래로 튕기는 제스쳐)
+// extends CursorPagination 이유 : 새로고침 할 때 이미 데이터가 있는 것을 가정하기 때문에
+// CursorPaginationBase 도 자연스럽게 상속받는다.
+// CursorPaginationRefetching가 이 프로젝트에서는 안 쓰일 듯
+class CursorPaginationRefetching<T> extends CursorPagination<T> {
+  // CursorPaginationRefetching is CursorPagination  == true
+  // CursorPaginationRefetching is CursorPaginationBase == true
+
+  CursorPaginationRefetching({
     required super.meta,
     required super.data,
   });

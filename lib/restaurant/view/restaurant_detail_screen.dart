@@ -36,6 +36,7 @@ class _RestaurantDetailScreenState
   @override
   void initState() {
     super.initState();
+    // 상세 정보를 가져오는 코드
     ref.read(restaurantProvider.notifier).getDetail(id: widget.id);
     controller.addListener(listener);
   }
@@ -54,6 +55,7 @@ class _RestaurantDetailScreenState
     final state = ref.watch(restaurantDetailProvider(widget.id));
     final ratingsState = ref.watch(restaurantRatingProvider(widget.id));
 
+    // restaurantDetailProvider의 상태가 없다면 로딩
     if (state == null) {
       return const DefaultLayout(
         child: Center(
@@ -168,6 +170,7 @@ class _RestaurantDetailScreenState
   }
 
   SliverToBoxAdapter renderTop({
+    // 원래는 restaurantDetailModel을 받았지만 RestaurantModel와 데이터가 겹치는 부분은 cache 처리하기로 했다.
     required RestaurantModel model,
   }) {
     return SliverToBoxAdapter(

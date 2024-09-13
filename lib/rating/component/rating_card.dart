@@ -146,8 +146,7 @@ class _Images extends StatelessWidget {
 
   const _Images({
     required this.images,
-    Key? key,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

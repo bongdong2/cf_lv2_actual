@@ -7,7 +7,11 @@ import '../repository/base_pagination_repository.dart';
 
 class PaginationProvider<
 T extends IModelWithId,
-U extends IBasePaginationRepository<T>> extends StateNotifier<CursorPaginationBase> {
+U extends IBasePaginationRepository<T>
+> extends StateNotifier<CursorPaginationBase> {
+
+  // T 타입은 페이지네이션에서 가져오는 실제 데이터의 타입
+
   final U repository;
 
   PaginationProvider({
@@ -19,7 +23,8 @@ U extends IBasePaginationRepository<T>> extends StateNotifier<CursorPaginationBa
   Future<void> paginate({
     int fetchCount = 20,
     bool fetchMore = false, // true: 추가로 데이터 더 가져오기, false: 새로고침(현재 상태를 덮어씌움)
-    bool forceRefetch = false, // 강제로 다시 로딩, true: CursorPaginationLoading()
+    bool forceRefetch = false, // 강제로
+    // 다시 로딩, true: CursorPaginationLoading()
   }) async {
     try {
       // State 상태가 5가지 가능성이 있다.
@@ -34,11 +39,13 @@ U extends IBasePaginationRepository<T>> extends StateNotifier<CursorPaginationBa
       // 2) 로딩 중 - fetchMore : true
       //    fetchMore가 아닐 때 - 새로고침의 의도가 있을 수 있다.
       if (state is CursorPagination && !forceRefetch) {
-        final pState = state as CursorPagination;
+        // 이 if문을 지났다는 것은 state가 CursorPagination 이라는 것이다.
+
+        final pState = state as CursorPagination; // as CursorPagination 무조건 이 타입일 경우에만 사용한다. 1%의 가능성이라고 있어서는 안 된다.
 
         // 더 데이터가 없다면
         if (!pState.meta.hasMore) {
-          return;
+          return; // hasMore가 false이면 이 paginate를 나가면 된다.
         }
       }
 
@@ -53,12 +60,15 @@ U extends IBasePaginationRepository<T>> extends StateNotifier<CursorPaginationBa
 
       // PaginationParams 생성
       PaginationParams paginationParams = PaginationParams(
-        count: fetchCount,
+        count: fetchCount, // 넣지 않아도 되는데(서버에서 기본적으로 지정하는 경우) 혹시나 함수를 호출할 수 있으니까
       );
 
-      // fetchMore : 데이터를 더 가져오는 상황
+      // fetchMore
+      // 데이터를 추가로 더 가져오는 상황
+      // fetchMore를 실행할 수 있는 상황은 화면에 데이터가 보여지고 있는 상황, 무조건 데이터를 들고 있는 상황
       if (fetchMore) {
-        final pState = state as CursorPagination<T>;
+        // 데이터를 들고 있으니까 이게 된다 -> CursorPagination extend하거나, CursorPagination의 인스턴스라는 것을 확신
+        final pState = state as CursorPagination<T>; // IModelWithId 덕분에 <T> 가능
 
         state = CursorPaginationFetchingMore(
           meta: pState.meta,
@@ -66,27 +76,29 @@ U extends IBasePaginationRepository<T>> extends StateNotifier<CursorPaginationBa
         );
 
         paginationParams = paginationParams.copyWith(
-          after: pState.data.last.id,
+          // IModelWithId 덕분에 '.' 찍으면 id 자동완성에 나온다.
+          after: pState.data.last.id, // 마지막 데이터의 id,
         );
       }
       // 데이터를 처음부터 가져오는 상황
       else {
         // 만약 데이터가 있는 상황이라면, 기본 데이터를 보존한 채로 Fetch (API 요청)를 진행
+        // state is CursorPagination : 데이터가 존재하는 상황, 자식 또는 인스턴스
+        // forceRefetch : 완전히 처음부터 새로고침이므로 데이터가 있는 상황은 !forceRefetch
         if (state is CursorPagination && !forceRefetch) {
+          // 데이터를 보여주다가 새롭게 대치되는 데이터를 유저에게 보여주는 게 앱이 빠르다는 느낌을 줌
           final pState = state as CursorPagination<T>;
 
           state = CursorPaginationRefetching<T>(
             meta: pState.meta,
             data: pState.data,
           );
-        }
-        // 나머지 상황
-        else {
+        } else { // 나머지 상황
           state = CursorPaginationLoading();
         }
       }
 
-      // 맨 처음 20개의 데이터를 가져오는 부분
+      // 맨 처음 20개의 데이터를 가져오는 부분, after 값이 없으므로
       final resp = await repository.paginate(
         paginationParams: paginationParams,
       );
@@ -100,6 +112,7 @@ U extends IBasePaginationRepository<T>> extends StateNotifier<CursorPaginationBa
           ...resp.data, // 새 데이터
         ]);
       } else {
+        // 처음 가져온 데이터를 state에 넣어서 보여줌
         state = resp;
       }
     } catch (e, stack) {

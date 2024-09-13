@@ -75,14 +75,14 @@ class RestaurantCard extends StatelessWidget {
     return Column(
       children: [
         if(heroKey != null)
-        Hero(
-          tag: ObjectKey(heroKey),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(isDetail ? 0 : 12.0),
-            child: image,
+          Hero(
+            tag: ObjectKey(heroKey),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(isDetail ? 0 : 12.0),
+              child: image,
+            ),
           ),
-        ),
-        if(heroKey == null)
+        if (heroKey == null)
           ClipRRect(
             borderRadius: BorderRadius.circular(isDetail ? 0 : 12.0),
             child: image,

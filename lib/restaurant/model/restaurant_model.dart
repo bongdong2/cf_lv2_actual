@@ -39,6 +39,7 @@ class RestaurantModel implements IModelWithId {
     required this.deliveryFee,
   });
 
+  // factory 생성자 .fromJson은 이름있는 생성자(named constructor)
   factory RestaurantModel.fromJson(Map<String, dynamic> json)
   => _$RestaurantModelFromJson(json);
   

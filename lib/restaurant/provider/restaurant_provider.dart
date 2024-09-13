@@ -5,28 +5,33 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../repository/restaurant_repository.dart';
 
+// Cache 데이터를 가져오기 위함
 final restaurantDetailProvider =
     Provider.family<RestaurantModel?, String>((ref, id) {
-  // provider에 id(상세정보)값을 넣어준다.
-  final state =
-      ref.watch(restaurantProvider); // restaurantProvider로부터 상태를 가져온다.
 
-  if (state is! CursorPagination) {
+  // provider에 id(상세정보)값을 넣어준다.
+  final state = ref.watch(restaurantProvider); // restaurantProvider로부터 상태를 가져온다.
+  // restaurantProvider의 상태가 변하면, restaurantDetailProvider도 변한다.
+
+  // CursorPagination이 아니라는 뜻은 데이터가 restaurantProvider에 없다는 뜻, 그래서 null 반환
+  if (state is! CursorPagination<RestaurantModel>) {
     return null;
   }
 
-  // id에 해당하는 레스토랑을 반환한다.
+  // restaurantProvider에서 가져온 restaurnat 목록의 id에 해당하는 레스토랑을 반환한다.
   return state.data.firstWhere((element) => element.id == id);
 });
 
-final restaurantProvider =
-    StateNotifierProvider<RestaurantStateNotifier, CursorPaginationBase>((ref) {
+final restaurantProvider = StateNotifierProvider<RestaurantStateNotifier, CursorPaginationBase>((ref) {
   final repository = ref.watch(restaurantRepositoryProvider);
   final notifier = RestaurantStateNotifier(repository: repository);
   return notifier;
 });
 
+
 class RestaurantStateNotifier extends PaginationProvider<RestaurantModel, RestaurantRepository> {
+  // PaginationProvider 가 StateNotifier 를 extends 하기 때문에 RestaurantStateNotifier 도 extends 한다.
+
   RestaurantStateNotifier({
     required super.repository,
   });
@@ -40,16 +45,32 @@ class RestaurantStateNotifier extends PaginationProvider<RestaurantModel, Restau
       await this.paginate();
     }
 
-    // state가 CussorPagination이 아닐 때, 그냥 리턴
+    // 바로 위에서 paginate헀는데도 state가 CussorPagination이 아닐 때, 리턴
+    // 뭔가 서버에서 에러가 발생했거나 장애가 있는 경우, 우리가 할 수 있는 게 없다.
     if (state is! CursorPagination) {
       return;
     }
 
+    // 이제 여기까지 왔다면 state is CursorPagination 보장
+
+
+    // restaurantModel
     final pState = state as CursorPagination;
 
+    // restaurantDetailModel
     final resp = await repository.getRestaurantDetail(id: id);
 
-    // 요청한 데이터만 변경이 된다??
+    // pState를 rooping 면서 id가 getDetail의 파라미터 id와 같다면 pState를 resp(새로 가져온 데이터)로 대치해야 한다.
+
+    /*
+    예를 들어
+    [RestaurantModel(1), RestaurantModel(2), RestaurantModel(3)..]
+    요청 id : 2인 친구를 Detail모델을 가져와라
+    getDetail(id: 2);
+    요청 후
+    [RestaurantModel(1), RestaurantDetailModel(2), RestaurantModel(3)..]
+    id : 2인 친구만 Detail 모델로 변경되었다.
+    */
     state = pState.copyWith(
       data: pState.data
           .map<RestaurantModel>((e) => e.id == id ? resp : e)
