@@ -10,8 +10,7 @@ typedef PaginationWidgetBuilder<T extends IModelWithId> = Widget Function(
     BuildContext context, int index, T model);
 
 class PaginationListView<T extends IModelWithId> extends ConsumerStatefulWidget {
-  final StateNotifierProvider<PaginationProvider, CursorPaginationBase>
-      provider;
+  final StateNotifierProvider<PaginationProvider, CursorPaginationBase> provider;
   final PaginationWidgetBuilder<T> itemBuilder;
 
   const PaginationListView({
