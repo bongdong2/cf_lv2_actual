@@ -76,7 +76,7 @@ class CustomInterceptor extends Interceptor {
 
   // 3) 에러가 났을 때
   @override
-  void onError(DioError err, ErrorInterceptorHandler handler) async {
+  void onError(DioException err, ErrorInterceptorHandler handler) async {
     // 401 에러가 났을 때(status code)
     // 토큰을 재발급 받는 시도를 하고 토큰이 재발급 되면
     // 다시 새로운 토큰으로 요청을 한다.
@@ -118,14 +118,20 @@ class CustomInterceptor extends Interceptor {
 
         // 요청 재전송
         final response = await dio.fetch(options);
+        return handler.resolve(response); // 실제 에러가 없었던 것처럼 에러를 던지지 않고 해결(resolve)
+      } on DioException catch (e) {
+        //ref.read(userMeProvider.notifier).logout();
+        // circular dependency error 순환 참조 오류
+        // A, B
+        // A -> B 참조
+        // B -> A 참조
+        // A -> B -> A -> B -> A ...
+        // userMeProvider -> dio -> userMeProvider -> dio....
 
-        // 실제 에러가 없었던 것처럼 에러를 던지지 않고 해결(resolve)
-        return handler.resolve(response);
-      } on DioError catch (e) {
+
         // refreshToken 만료되면 로그아웃 하기
         // circular dependency erorr 방지를 위해 logout() 만듬
         ref.read(authProvider.notifier).logout();
-
         return handler.reject(e);
       }
     }

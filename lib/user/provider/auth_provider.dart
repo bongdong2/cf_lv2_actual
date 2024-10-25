@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:actual/common/view/root_tab.dart';
 import 'package:actual/common/view/splash_screen.dart';
+import 'package:actual/restaurant/view/basket_screen.dart';
 import 'package:actual/restaurant/view/restaurant_detail_screen.dart';
 import 'package:actual/user/provider/user_me_proivder.dart';
 import 'package:actual/user/view/login_screen.dart';
@@ -21,6 +22,7 @@ class AuthProvider extends ChangeNotifier {
   AuthProvider({
     required this.ref,
   }) {
+    // userMeProvider에서 변경사항이 생기면 AuthProvider에 알린다.
     ref.listen<UserModelBase?>(
       userMeProvider,
       (previous, next) {
@@ -48,6 +50,11 @@ class AuthProvider extends ChangeNotifier {
           ],
         ),
         GoRoute(
+          path: '/basket',
+          name: BasketScreen.routeName,
+          builder: (_, state) => BasketScreen(),
+        ),
+        GoRoute(
           path: '/splash',
           name: SplashScreen.routeName,
           builder: (_, __) => SplashScreen(),
@@ -61,13 +68,11 @@ class AuthProvider extends ChangeNotifier {
 
   void logout() {
     ref.read(userMeProvider.notifier).logout();
+    notifyListeners(); //강의에서넣으려다가 넣지 않음
   }
 
-  // SplashScreen
-  // 앱을 처음 시작했을때
-  // 토큰이 존재하는지 확인하고
-  // 로그인 스크린으로 보내줄지
-  // 홈 스크린으로 보내줄지 확인하는 과정이 필요하다.
+  // SplashScreen이 필요한 이유
+  // 앱을 처음 시작했을때 토큰이 존재하는지 확인하고 로그인 스크린으로 보내줄지 홈 스크린으로 보내줄지 확인하는 과정이 필요하다.
   FutureOr<String?> redirectLogic(BuildContext context, GoRouterState state) {
     // FutureOr<T> : Future<T> 또는 즉시 T를 반환
 

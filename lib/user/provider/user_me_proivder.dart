@@ -9,13 +9,13 @@ import '../repository/user_me_repository.dart';
 
 final userMeProvider = StateNotifierProvider<UserMeStateNotifier, UserModelBase?>(
   (ref) {
-    final authRepostiory = ref.watch(authRepositoryProvider);
-    final userMeRepositor = ref.watch(userMeRepositoryProvider);
+    final authRepository = ref.watch(authRepositoryProvider);
+    final userMeRepository = ref.watch(userMeRepositoryProvider);
     final storage = ref.watch(secureStorageProvider);
 
     return UserMeStateNotifier(
-      authRepository: authRepostiory,
-      repository: userMeRepositor,
+      authRepository: authRepository,
+      repository: userMeRepository,
       storage: storage,
     );
   },
@@ -61,6 +61,9 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
         password: password,
       );
 
+      print(resp.refreshToken);
+      print(resp.accessToken);
+
       await storage.write(key: REFRESH_TOKEN_KEY, value: resp.refreshToken);
       await storage.write(key: ACCESS_TOKEN_KEY, value: resp.accessToken);
 
@@ -70,6 +73,7 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
 
       return userResp;
     } catch (e) {
+      // 실제는 메시지가 더 디테일해야 한다. username, password가 잘못된 것인지 등
       state = UserModelError(message: '로그인에 실패했습니다.');
       return Future.value(state);
     }
@@ -77,9 +81,6 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
 
   Future<void> logout() async {
     state = null;
-
-    //await storage.delete(key: REFRESH_TOKEN_KEY);
-    //await storage.delete(key: ACCESS_TOKEN_KEY);
 
     await Future.wait([
       storage.delete(key: REFRESH_TOKEN_KEY),

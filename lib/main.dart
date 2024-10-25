@@ -23,9 +23,9 @@ class _App extends ConsumerWidget {
       ),
       debugShowCheckedModeBanner: false,
       routerConfig: router,
-      // routerDelegate: router.routerDelegate,
-      // routeInformationParser: router.routeInformationParser,
-      // routeInformationProvider: router.routeInformationProvider,
+      //routerDelegate: router.routerDelegate,
+      //routeInformationParser: router.routeInformationParser,
+      //routeInformationProvider: router.routeInformationProvider,
     );
   }
 }

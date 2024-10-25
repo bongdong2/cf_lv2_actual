@@ -1,17 +1,25 @@
 import 'package:actual/common/layout/default_layout.dart';
 import 'package:actual/common/model/cursor_pagination_model.dart';
+import 'package:actual/common/provider/go_router.dart';
 import 'package:actual/common/utils/pagination_utils.dart';
 import 'package:actual/product/component/product_card.dart';
+import 'package:actual/product/model/product_model.dart';
 import 'package:actual/rating/component/rating_card.dart';
 import 'package:actual/restaurant/component/restaurant_card.dart';
 import 'package:actual/restaurant/model/restaurant_detail_model.dart';
 import 'package:actual/restaurant/model/restaurant_model.dart';
 import 'package:actual/restaurant/provider/restaurant_provider.dart';
 import 'package:actual/restaurant/provider/restaurant_rating_provider.dart';
-import 'package:flutter/material.dart';
+import 'package:actual/restaurant/view/basket_screen.dart';
+import 'package:actual/user/provider/basket_provider.dart';
+import 'package:badges/badges.dart';
+import 'package:flutter/material.dart'
+    hide Badge; // material에 Badge가 생겨서 강의처럼 적용하기 위해 hide
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
+import '../../common/const/colors.dart';
 import '../../rating/model/rating_model.dart';
 
 class RestaurantDetailScreen extends ConsumerStatefulWidget {
@@ -54,6 +62,7 @@ class _RestaurantDetailScreenState
   Widget build(BuildContext context) {
     final state = ref.watch(restaurantDetailProvider(widget.id));
     final ratingsState = ref.watch(restaurantRatingProvider(widget.id));
+    final basket = ref.watch(basketProvider);
 
     // restaurantDetailProvider의 상태가 없다면 로딩
     if (state == null) {
@@ -66,6 +75,34 @@ class _RestaurantDetailScreenState
 
     return DefaultLayout(
       title: '불타는 떡볶이',
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          context.pushNamed(BasketScreen.routeName);
+        },
+        backgroundColor: PRIMARY_COLOR,
+        child: Badge(
+          showBadge: basket.isNotEmpty,
+          badgeContent: Text(
+            basket.fold<int>(
+                  0,
+                  (previous, next) => previous + next.count,
+                )
+                .toString(),
+            style: TextStyle(
+              color: PRIMARY_COLOR,
+              fontSize: 10.0,
+            ),
+          ),
+          badgeStyle: BadgeStyle(
+            badgeColor: Colors.white,
+            padding: EdgeInsets.all(5),
+          ),
+          child: Icon(
+            Icons.shopping_basket_outlined,
+            color: Colors.white,
+          ),
+        ),
+      ),
       child: CustomScrollView(
         controller: controller,
         slivers: [
@@ -76,6 +113,7 @@ class _RestaurantDetailScreenState
           if (state is RestaurantDetailModel) renderLabel(),
           if (state is RestaurantDetailModel)
             renderProducts(
+              restaurant: state,
               products: state.products,
             ),
           if (ratingsState is CursorPagination<RatingModel>)
@@ -119,7 +157,7 @@ class _RestaurantDetailScreenState
         delegate: SliverChildListDelegate(
           List.generate(
             3,
-                (index) => Padding(
+            (index) => Padding(
               padding: const EdgeInsets.only(
                 bottom: 32.0,
               ),
@@ -150,17 +188,33 @@ class _RestaurantDetailScreenState
     );
   }
 
-  SliverPadding renderProducts(
-      {required List<RestaurantProductModel> products}) {
+  SliverPadding renderProducts({
+    required RestaurantModel restaurant,
+    required List<RestaurantProductModel> products,
+  }) {
     return SliverPadding(
       padding: EdgeInsets.symmetric(horizontal: 16.0),
       sliver: SliverList(
         delegate: SliverChildBuilderDelegate(
           (context, index) {
             final model = products[index];
-            return Padding(
-              padding: const EdgeInsets.only(top: 16.0),
-              child: ProductCard.fromRestaurantProductModel(model: model),
+            return InkWell(
+              // InkWell, GestureDetector 차이는 UI의 반응성이다. 화면이 전환되지 않으면 InkWell을 보통 사용한다.
+              onTap: () {
+                ref.read(basketProvider.notifier).addToBasket(
+                      product: ProductModel(
+                          id: model.id,
+                          name: model.name,
+                          detail: model.detail,
+                          imgUrl: model.imgUrl,
+                          price: model.price,
+                          restaurant: restaurant),
+                    );
+              },
+              child: Padding(
+                padding: const EdgeInsets.only(top: 16.0),
+                child: ProductCard.fromRestaurantProductModel(model: model),
+              ),
             );
           },
           childCount: products.length,

@@ -73,15 +73,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   height: 16.0,
                 ),
                 ElevatedButton(
+                    // UserModelLoading이면 버튼을 누를 수 없게
                     onPressed: state is UserModelLoading
                         ? null
                         : () async {
-                            final rawString = '$username:$password';
                             ref.read(userMeProvider.notifier).login(
                                   username: username,
                                   password: password,
                                 );
 
+                            //final rawString = '$username:$password';
                             // // <String, String> : String 값을 넣고 String을 반환 받겠다.
                             // // Base64 값으로 인코딩
                             // Codec<String, String> stringToBase64 = utf8.fuse(base64);
