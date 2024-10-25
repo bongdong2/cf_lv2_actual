@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:actual/common/view/root_tab.dart';
 import 'package:actual/common/view/splash_screen.dart';
+import 'package:actual/order/view/order_done_screen.dart';
 import 'package:actual/restaurant/view/basket_screen.dart';
 import 'package:actual/restaurant/view/restaurant_detail_screen.dart';
 import 'package:actual/user/provider/user_me_proivder.dart';
@@ -53,6 +54,11 @@ class AuthProvider extends ChangeNotifier {
           path: '/basket',
           name: BasketScreen.routeName,
           builder: (_, state) => BasketScreen(),
+        ),
+        GoRoute(
+          path: '/order_done',
+          name: OrderDoneScreen.routeName,
+          builder: (_, state) => OrderDoneScreen(),
         ),
         GoRoute(
           path: '/splash',
