@@ -9,8 +9,10 @@ import '../provider/pagination_provider.dart';
 typedef PaginationWidgetBuilder<T extends IModelWithId> = Widget Function(
     BuildContext context, int index, T model);
 
-class PaginationListView<T extends IModelWithId> extends ConsumerStatefulWidget {
-  final StateNotifierProvider<PaginationProvider, CursorPaginationBase> provider;
+class PaginationListView<T extends IModelWithId>
+    extends ConsumerStatefulWidget {
+  final StateNotifierProvider<PaginationProvider, CursorPaginationBase>
+      provider;
   final PaginationWidgetBuilder<T> itemBuilder;
 
   const PaginationListView({
@@ -20,10 +22,12 @@ class PaginationListView<T extends IModelWithId> extends ConsumerStatefulWidget 
   });
 
   @override
-  ConsumerState<PaginationListView> createState() => _PaginationListViewState<T>();
+  ConsumerState<PaginationListView> createState() =>
+      _PaginationListViewState<T>();
 }
 
-class _PaginationListViewState<T extends IModelWithId> extends ConsumerState<PaginationListView> {
+class _PaginationListViewState<T extends IModelWithId>
+    extends ConsumerState<PaginationListView> {
   final ScrollController controller = ScrollController();
 
   @override
@@ -72,8 +76,8 @@ class _PaginationListViewState<T extends IModelWithId> extends ConsumerState<Pag
           ElevatedButton(
             onPressed: () {
               ref.read(widget.provider.notifier).paginate(
-                forceRefetch: true,
-              );
+                    forceRefetch: true,
+                  );
             },
             child: Text(
               '다시 시도',
@@ -92,35 +96,44 @@ class _PaginationListViewState<T extends IModelWithId> extends ConsumerState<Pag
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: ListView.separated(
-        controller: controller,
-        itemCount: cp.data.length + 1, // + 1 이유는 로딩 CircularProgressIndicator 때문에
-        itemBuilder: (_, index) {
-          if (index == cp.data.length) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
-                vertical: 32.0,
-              ),
-              child: Center(
-                child: cp is CursorPaginationFetchingMore // 더 데이터를 가져오는 로딩 상태
-                    ? CircularProgressIndicator()
-                    : Text('마지막 데이터 입니다.'),
-              ),
-            );
-          }
-
-          final pItem = cp.data[index];
-
-          return widget.itemBuilder(
-            context,
-            index,
-            pItem,
+      child: RefreshIndicator(
+        onRefresh: () async {
+          ref.read(widget.provider.notifier).paginate(
+            forceRefetch: true,
           );
         },
-        separatorBuilder: (_, index) {
-          return SizedBox(height: 16.0);
-        },
+        child: ListView.separated(
+          physics: AlwaysScrollableScrollPhysics(), // 항상 스크롤할 수 있게 해준다.
+          controller: controller,
+          itemCount: cp.data.length + 1,
+          // + 1 이유는 로딩 CircularProgressIndicator 때문에
+          itemBuilder: (_, index) {
+            if (index == cp.data.length) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 32.0,
+                ),
+                child: Center(
+                  child: cp is CursorPaginationFetchingMore // 더 데이터를 가져오는 로딩 상태
+                      ? CircularProgressIndicator()
+                      : Text('마지막 데이터 입니다.'),
+                ),
+              );
+            }
+
+            final pItem = cp.data[index];
+
+            return widget.itemBuilder(
+              context,
+              index,
+              pItem,
+            );
+          },
+          separatorBuilder: (_, index) {
+            return SizedBox(height: 16.0);
+          },
+        ),
       ),
     );
   }
