@@ -1,23 +1,45 @@
 import 'package:actual/common/model/cursor_pagination_model.dart';
 import 'package:actual/common/model/model_with_id.dart';
+import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../model/pagination_params.dart';
 import '../repository/base_pagination_repository.dart';
 
-class PaginationProvider<
-T extends IModelWithId,
-U extends IBasePaginationRepository<T>
-> extends StateNotifier<CursorPaginationBase> {
+class _PaginationInfo {
+  final int fetchCount;
+  final bool fetchMore; // true: 추가로 데이터 더 가져오기, false: 새로고침(현재 상태를 덮어씌움)
+  final bool forceRefetch; // 강제로
 
+  _PaginationInfo({
+    this.fetchCount = 20,
+    this.fetchMore = false,
+    this.forceRefetch = false,
+  });
+}
+
+class PaginationProvider<T extends IModelWithId,
+        U extends IBasePaginationRepository<T>>
+    extends StateNotifier<CursorPaginationBase> {
   // T 타입은 페이지네이션에서 가져오는 실제 데이터의 타입
 
   final U repository;
+  final paginationThrottle = Throttle(
+    Duration(seconds: 3),
+    initialValue: _PaginationInfo(),
+    checkEquality: false, // 실행할 떄마다 스로틀이 걸리길 원한다.
+  );
 
   PaginationProvider({
     required this.repository,
   }) : super(CursorPaginationLoading()) {
     paginate();
+
+    paginationThrottle.values.listen(
+        (state) {
+          _throttledPagination(state);
+        }
+    );
   }
 
   Future<void> paginate({
@@ -26,6 +48,18 @@ U extends IBasePaginationRepository<T>
     bool forceRefetch = false, // 강제로
     // 다시 로딩, true: CursorPaginationLoading()
   }) async {
+    paginationThrottle.setValue(_PaginationInfo(
+      fetchCount: fetchCount,
+      fetchMore: fetchMore,
+      forceRefetch: forceRefetch,
+    ));
+  }
+
+  _throttledPagination(_PaginationInfo info) async {
+    final fetchCount = info.fetchCount;
+    final fetchMore = info.fetchMore;
+    final forceRefetch = info.forceRefetch;
+
     try {
       // State 상태가 5가지 가능성이 있다.
       // 1) CursorPagination : 정상적으로 데이터가 있는 상태
@@ -41,7 +75,8 @@ U extends IBasePaginationRepository<T>
       if (state is CursorPagination && !forceRefetch) {
         // 이 if문을 지났다는 것은 state가 CursorPagination 이라는 것이다.
 
-        final pState = state as CursorPagination; // as CursorPagination 무조건 이 타입일 경우에만 사용한다. 1%의 가능성이라고 있어서는 안 된다.
+        final pState = state
+        as CursorPagination; // as CursorPagination 무조건 이 타입일 경우에만 사용한다. 1%의 가능성이라고 있어서는 안 된다.
 
         // 더 데이터가 없다면
         if (!pState.meta.hasMore) {
@@ -93,7 +128,8 @@ U extends IBasePaginationRepository<T>
             meta: pState.meta,
             data: pState.data,
           );
-        } else { // 나머지 상황
+        } else {
+          // 나머지 상황
           state = CursorPaginationLoading();
         }
       }
